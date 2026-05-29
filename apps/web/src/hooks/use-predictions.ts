@@ -29,9 +29,7 @@ export function useAnalyzeImage() {
       formData.append("file", file);
       if (petId) formData.append("pet_id", petId);
 
-      const res = await api.post("/predictions/analyze", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await api.post("/predictions/analyze", formData);
       return res.data as Prediction;
     },
     onSuccess: () => {
