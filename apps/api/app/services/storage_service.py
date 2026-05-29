@@ -104,21 +104,25 @@ class StorageService:
         user_id: str,
         original_filename: str,
         content_type: str,
-    ) -> str:
+    ) -> str | None:
         """
         Compress then upload image bytes to R2. Returns the R2 object key.
         Key format: uploads/{user_id}/{uuid}.jpg (always JPEG after compression)
         """
+        if not settings.cloudflare_r2_bucket_name or not settings.cloudflare_r2_access_key_id or not settings.cloudflare_r2_secret_access_key:
+            logger.warning("R2 is not fully configured. Skipping upload.")
+            return None
+
+        if not settings.cloudflare_r2_endpoint_url:
+            logger.warning("R2 endpoint URL is not configured. Skipping upload.")
+            return None
+
         # Compress server-side before storing
         file_bytes, content_type = compress_image_bytes(file_bytes, content_type)
 
         # Use .jpg extension after compression (we always output JPEG)
         ext = "jpg" if content_type == "image/jpeg" else safe_image_extension(original_filename)
         key = f"uploads/{user_id}/{uuid.uuid4()}.{ext}"
-
-        if settings.is_development and not settings.cloudflare_r2_endpoint_url:
-            logger.warning("R2 not configured. Skipping upload, returning mock key: %s", key)
-            return key
 
         self._get_client().put_object(
             Bucket=settings.cloudflare_r2_bucket_name,
@@ -130,11 +134,18 @@ class StorageService:
         logger.info("Uploaded %s KB to R2: %s", len(file_bytes) // 1024, key)
         return key
 
-    def get_presigned_url(self, r2_key: str, expires_in: int = 3600) -> str:
+    def get_presigned_url(self, r2_key: str | None, expires_in: int = 3600) -> str | None:
         """Generate a presigned URL for direct access (valid for expires_in seconds)."""
+        if not r2_key:
+            return None
+
         if settings.cloudflare_r2_public_url:
             # If bucket is public, construct URL directly (no signing overhead)
             return f"{settings.cloudflare_r2_public_url.rstrip('/')}/{r2_key}"
+
+        if not settings.cloudflare_r2_bucket_name:
+            logger.warning("Cannot generate presigned URL without R2 bucket name.")
+            return None
 
         return self._get_client().generate_presigned_url(
             "get_object",

@@ -184,28 +184,37 @@ class PredictionService:
     ) -> AIPrediction:
         """Create a new DB prediction record using cached inference data (no R2 upload, no re-inference)."""
         loop = asyncio.get_running_loop()
-        r2_key = await loop.run_in_executor(
-            None,
-            lambda: storage_service.upload_image(
-                image_bytes, str(user_id), original_filename, content_type
-            ),
-        )
-        upload = Upload(
-            user_id=user_id,
-            r2_key=r2_key,
-            r2_bucket=settings.cloudflare_r2_bucket_name,
-            original_filename=original_filename[:255],
-            content_type=content_type,
-            size_bytes=len(image_bytes),
-            sha256_hash=image_hash,
-        )
-        db.add(upload)
-        await db.flush()
+        r2_key: str | None = None
+        try:
+            r2_key = await loop.run_in_executor(
+                None,
+                lambda: storage_service.upload_image(
+                    image_bytes, str(user_id), original_filename, content_type
+                ),
+            )
+        except Exception as exc:
+            logger.warning("Cached prediction image upload skipped: %s", exc)
+            r2_key = None
+
+        upload_id: uuid.UUID | None = None
+        if r2_key:
+            upload = Upload(
+                user_id=user_id,
+                r2_key=r2_key,
+                r2_bucket=settings.cloudflare_r2_bucket_name,
+                original_filename=original_filename[:255],
+                content_type=content_type,
+                size_bytes=len(image_bytes),
+                sha256_hash=image_hash,
+            )
+            db.add(upload)
+            await db.flush()
+            upload_id = upload.id
 
         prediction = AIPrediction(
             user_id=user_id,
             pet_id=pet_id,
-            upload_id=upload.id,
+            upload_id=upload_id,
             top_breed=cached["top_breed"],
             top_confidence=cached["top_confidence"],
             all_predictions=cached["all_predictions"],
