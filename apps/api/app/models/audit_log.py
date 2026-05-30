@@ -4,11 +4,11 @@ import uuid
 from datetime import datetime
 from typing import Any, TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, func, Index
-from sqlalchemy.dialects.postgresql import INET, JSONB, UUID
+from sqlalchemy import DateTime, ForeignKey, JSON, String, Text, func, Index
+from sqlalchemy.dialects.postgresql import INET, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, UUIDMixin
+from app.models.base import Base, UUIDMixin, GUID
 
 if TYPE_CHECKING:
     from app.models.user import User
@@ -29,15 +29,15 @@ class AuditLog(Base, UUIDMixin):
     )
 
     user_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
     )
     action: Mapped[str] = mapped_column(String(100), nullable=False)
     resource_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    resource_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    resource_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict[str, Any] | None] = mapped_column(
-        "metadata", JSONB, nullable=True
+        "metadata", JSONB().with_variant(JSON(), "sqlite"), nullable=True
     )
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)

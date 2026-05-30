@@ -4,11 +4,11 @@ import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import ForeignKey, Index, Integer, Numeric, String
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import ForeignKey, Index, Integer, JSON, Numeric, String
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, TimestampMixin, UUIDMixin
+from app.models.base import Base, TimestampMixin, UUIDMixin, GUID
 
 if TYPE_CHECKING:
     from app.models.pet import Pet
@@ -26,20 +26,20 @@ class AIPrediction(Base, UUIDMixin, TimestampMixin):
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     pet_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pets.id", ondelete="SET NULL"), nullable=True, index=True
+        GUID(), ForeignKey("pets.id", ondelete="SET NULL"), nullable=True, index=True
     )
     upload_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         ForeignKey("uploads.id", ondelete="SET NULL"),
         nullable=True,
     )
     top_breed: Mapped[str] = mapped_column(String(100), nullable=False)
     top_confidence: Mapped[Decimal] = mapped_column(Numeric(5, 4), nullable=False)
     all_predictions: Mapped[list[dict[str, Any]]] = mapped_column(
-        JSONB, nullable=False
+        JSONB().with_variant(JSON(), "sqlite"), nullable=False
     )  # [{breed, confidence}]
     model_version: Mapped[str] = mapped_column(String(50), nullable=False)
     inference_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)

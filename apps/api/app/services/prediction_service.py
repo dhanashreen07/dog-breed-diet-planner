@@ -16,7 +16,6 @@ from app.models.upload import Upload
 from app.ml.pipeline import InferencePipelineResult, run_inference
 from app.services.storage_service import storage_service
 from app.utils.cache import cache
-from app.utils.validators import validate_image_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +38,8 @@ class PredictionService:
         pet_id: uuid.UUID | None = None,
     ) -> AIPrediction:
         # 1. Validate image (magic-byte MIME check, PIL open, dimension check)
+        from app.utils.validators import validate_image_bytes
+
         validate_image_bytes(image_bytes, content_type)
 
         # 2. Hash for cache key and deduplication

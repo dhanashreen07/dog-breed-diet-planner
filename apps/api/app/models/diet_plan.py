@@ -4,11 +4,11 @@ import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import ForeignKey, Index, Integer, Numeric, String, Text
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import ForeignKey, Index, Integer, JSON, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, TimestampMixin, UUIDMixin
+from app.models.base import Base, TimestampMixin, UUIDMixin, GUID
 
 if TYPE_CHECKING:
     from app.models.pet import Pet
@@ -26,13 +26,13 @@ class DietPlan(Base, UUIDMixin, TimestampMixin):
     )
 
     pet_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pets.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey("pets.id", ondelete="CASCADE"), nullable=False, index=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     prediction_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         ForeignKey("ai_predictions.id", ondelete="SET NULL"),
         nullable=True,
     )
@@ -51,15 +51,15 @@ class DietPlan(Base, UUIDMixin, TimestampMixin):
     meals_per_day: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # Recommendations
-    food_recommendations: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False)
-    foods_to_avoid: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
-    supplement_flags: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
-    feeding_schedule: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False)
+    food_recommendations: Mapped[list[dict[str, Any]]] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), nullable=False)
+    foods_to_avoid: Mapped[list[str]] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), nullable=False)
+    supplement_flags: Mapped[list[str]] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), nullable=False)
+    feeding_schedule: Mapped[list[dict[str, Any]]] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     engine_version: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # AI-generated enrichment (optional — null if AI not configured or disabled)
-    ai_insights: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    ai_insights: Mapped[dict[str, Any] | None] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), nullable=True)
     # Which provider generated the insights (e.g. 'gemini', 'openai') — never stores the key
     ai_provider_used: Mapped[str | None] = mapped_column(String(50), nullable=True)
 

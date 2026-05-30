@@ -5,11 +5,11 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, JSON, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, TimestampMixin, UUIDMixin
+from app.models.base import Base, TimestampMixin, UUIDMixin, GUID
 
 if TYPE_CHECKING:
     from app.models.diet_plan import DietPlan
@@ -27,7 +27,7 @@ class Pet(Base, UUIDMixin, TimestampMixin):
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     breed: Mapped[str | None] = mapped_column(String(100), nullable=True)
@@ -45,8 +45,8 @@ class Pet(Base, UUIDMixin, TimestampMixin):
     activity_level: Mapped[str] = mapped_column(
         String(20), default="moderate", nullable=False
     )  # sedentary | light | moderate | active | very_active
-    allergies: Mapped[list[str]] = mapped_column(JSONB, default=list, nullable=False)
-    health_conditions: Mapped[list[str]] = mapped_column(JSONB, default=list, nullable=False)
+    allergies: Mapped[list[str]] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), default=list, nullable=False)
+    health_conditions: Mapped[list[str]] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), default=list, nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     avatar_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
