@@ -43,12 +43,19 @@ class DietPlan(Base, UUIDMixin, TimestampMixin):
     weight_kg: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
     activity_level: Mapped[str] = mapped_column(String(20), nullable=False)
 
-    # Calculated nutritional targets
+    # Calculated nutritional targets (daily)
     daily_calories: Mapped[int] = mapped_column(Integer, nullable=False)  # kcal/day
     protein_g: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
     fat_g: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
     carbs_g: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
     meals_per_day: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Weekly aggregates
+    weekly_calories: Mapped[int] = mapped_column(Integer, nullable=False)  # kcal/week
+    weekly_protein_g: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False)
+    weekly_fat_g: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False)
+    weekly_carbs_g: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False)
+    meals_per_week: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # Recommendations
     food_recommendations: Mapped[list[dict[str, Any]]] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), nullable=False)

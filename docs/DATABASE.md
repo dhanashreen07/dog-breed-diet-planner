@@ -79,11 +79,11 @@ Synced from Clerk via webhook. Source of truth for auth is Clerk.
 | age_months | INTEGER | |
 | weight_kg | DECIMAL(5,2) | |
 | activity_level | ENUM | |
-| daily_calories | INTEGER | kcal/day |
-| protein_g | DECIMAL(6,2) | grams/day |
-| fat_g | DECIMAL(6,2) | grams/day |
-| carbs_g | DECIMAL(6,2) | grams/day |
-| meals_per_day | INTEGER | |
+| daily_calories | INTEGER | kcal/week |
+| protein_g | DECIMAL(6,2) | grams/week |
+| fat_g | DECIMAL(6,2) | grams/week |
+| carbs_g | DECIMAL(6,2) | grams/week |
+| meals_per_week | INTEGER | |
 | food_recommendations | JSONB | [{name, amount_g, notes}] |
 | foods_to_avoid | JSONB | Array of strings |
 | supplement_flags | JSONB | Array of strings |
