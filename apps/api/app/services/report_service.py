@@ -88,15 +88,15 @@ def generate_diet_report_pdf(pet: Pet, plan: DietPlan) -> bytes:
     story.append(_make_table(pet_data))
     story.append(Spacer(1, 0.4 * cm))
 
-    # ─── Daily Nutritional Targets ───
-    story.append(Paragraph("Daily Nutritional Targets", heading_style))
+    # ─── Weekly Nutritional Targets ───
+    story.append(Paragraph("Weekly Nutritional Targets", heading_style))
     nutrition_data = [
-        ["Metric", "Daily Requirement"],
-        ["Total Calories", f"{plan.daily_calories} kcal"],
-        ["Protein", f"{plan.protein_g} g"],
-        ["Fat", f"{plan.fat_g} g"],
-        ["Carbohydrates", f"{plan.carbs_g} g"],
-        ["Meals per Day", str(plan.meals_per_day)],
+        ["Metric", "Weekly Requirement"],
+        ["Total Calories", f"{int(plan.daily_calories * 7)} kcal"],
+        ["Protein", f"{float(plan.protein_g) * 7} g"],
+        ["Fat", f"{float(plan.fat_g) * 7} g"],
+        ["Carbohydrates", f"{float(plan.carbs_g) * 7} g"],
+        ["Meals per Week", str(int(plan.meals_per_day * 7))],
     ]
     story.append(_make_table(nutrition_data, has_header=True))
     story.append(Spacer(1, 0.4 * cm))
@@ -105,9 +105,10 @@ def generate_diet_report_pdf(pet: Pet, plan: DietPlan) -> bytes:
     story.append(Paragraph("Recommended Foods", heading_style))
     food_data = [["Food", "Amount (g)", "Category", "Notes"]]
     for food in plan.food_recommendations:
+        amt = float(food.get("amount_g", 0) or 0)
         food_data.append([
             food.get("name", ""),
-            str(food.get("amount_g", "")),
+            str(int(amt * 7)),
             food.get("category", "").title(),
             food.get("notes", "") or "—",
         ])
@@ -119,11 +120,13 @@ def generate_diet_report_pdf(pet: Pet, plan: DietPlan) -> bytes:
     story.append(Paragraph("Feeding Schedule", heading_style))
     schedule_data = [["Meal", "Time", "Calories (kcal)", "Approx. Amount (g)"]]
     for meal in plan.feeding_schedule:
+        kcal = float(meal.get("amount_kcal", 0) or 0)
+        amtg = float(meal.get("amount_g", 0) or 0)
         schedule_data.append([
             meal.get("meal_name", ""),
             meal.get("time_suggestion", ""),
-            str(meal.get("amount_kcal", "")),
-            str(meal.get("amount_g", "")),
+            str(int(kcal * 7)),
+            str(int(amtg * 7)),
         ])
     if len(schedule_data) > 1:
         story.append(_make_table(schedule_data, has_header=True))

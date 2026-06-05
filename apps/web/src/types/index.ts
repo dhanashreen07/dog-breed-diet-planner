@@ -112,6 +112,11 @@ export interface DietPlan {
   feeding_schedule: FeedingScheduleItem[];
   special_notes: string[];
   engine_version: string;
+  weekly_calories?: number;
+  weekly_protein_g?: number;
+  weekly_fat_g?: number;
+  weekly_carbs_g?: number;
+  meals_per_week?: number;
   created_at: string;
   updated_at: string;
 }

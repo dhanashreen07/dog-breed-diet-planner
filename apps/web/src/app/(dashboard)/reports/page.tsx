@@ -6,6 +6,7 @@ import { useApiClient } from "@/hooks/use-api-client";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Download, FileText, Loader2 } from "lucide-react";
+import { formatCalories } from "@/lib/utils";
 
 export default function ReportsPage() {
   const { pets } = usePets();
@@ -65,8 +66,7 @@ export default function ReportsPage() {
                       {pet?.name || "Unknown Pet"} — Diet Plan
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(plan.created_at).toLocaleDateString()} ·{" "}
-                      {plan.daily_calories} kcal/day
+                        {new Date(plan.created_at).toLocaleDateString()} · {formatCalories(plan.weekly_calories ?? plan.daily_calories * 7)} / week
                     </p>
                   </div>
                 </div>

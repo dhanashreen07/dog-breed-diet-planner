@@ -17,7 +17,7 @@ export function DietPlanCard({ plan }: DietPlanCardProps) {
         <div className="flex items-center gap-2">
           <Flame className="h-5 w-5 text-primary" />
           <h3 className="font-semibold text-foreground">
-            {formatCalories(plan.daily_calories)} / day
+            {formatCalories(plan.weekly_calories ?? plan.daily_calories * 7)} / week
           </h3>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -27,14 +27,14 @@ export function DietPlanCard({ plan }: DietPlanCardProps) {
 
       <div className="p-5 space-y-5">
         {/* Macros chart */}
-        <NutritionChart protein={plan.protein_g} fat={plan.fat_g} carbs={plan.carbs_g} />
+        <NutritionChart protein={plan.weekly_protein_g ?? plan.protein_g * 7} fat={plan.weekly_fat_g ?? plan.fat_g * 7} carbs={plan.weekly_carbs_g ?? plan.carbs_g * 7} />
 
         {/* Macros table */}
         <div className="grid grid-cols-3 gap-2 text-center text-sm">
           {[
-            { label: "Protein", value: `${Math.round(plan.protein_g)}g`, color: "text-blue-500" },
-            { label: "Fat", value: `${Math.round(plan.fat_g)}g`, color: "text-amber-500" },
-            { label: "Carbs", value: `${Math.round(plan.carbs_g)}g`, color: "text-emerald-500" },
+            { label: "Protein", value: `${Math.round(plan.weekly_protein_g ?? plan.protein_g * 7)}g`, color: "text-blue-500" },
+            { label: "Fat", value: `${Math.round(plan.weekly_fat_g ?? plan.fat_g * 7)}g`, color: "text-amber-500" },
+            { label: "Carbs", value: `${Math.round(plan.weekly_carbs_g ?? plan.carbs_g * 7)}g`, color: "text-emerald-500" },
           ].map((m) => (
             <div key={m.label} className="rounded-lg bg-muted/30 py-2">
               <p className={`font-bold ${m.color}`}>{m.value}</p>

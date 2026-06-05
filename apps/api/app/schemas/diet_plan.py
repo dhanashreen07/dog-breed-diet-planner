@@ -54,6 +54,12 @@ class DietPlanPublic(APIBaseModel):
     feeding_schedule: list[FeedingScheduleItem]
     notes: str | None
     engine_version: str
+    # Weekly aggregates (non-persistent, computed by API)
+    weekly_calories: int | None = None
+    weekly_protein_g: Decimal | None = None
+    weekly_fat_g: Decimal | None = None
+    weekly_carbs_g: Decimal | None = None
+    meals_per_week: int | None = None
     # AI-generated insights (null when AI is disabled or unconfigured)
     ai_insights: dict | None = None
     ai_provider_used: str | None = None
